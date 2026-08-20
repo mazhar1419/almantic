@@ -815,7 +815,7 @@
 
             </div>
 
-            <a href="#" class="button button-white">
+            <a href="https://github.com/mazhar1419/almantic" target="_blank" class="button button-white">
                 View on GitHub →
             </a>
 
@@ -913,7 +913,7 @@
 
             <strong>Resources</strong>
 
-            <a href="#">GitHub</a>
+            <a href="https://github.com/mazhar1419/almantic" target="_blank" >GitHub</a>
             <a href="#">Documentation</a>
             <a href="#">Roadmap</a>
 
