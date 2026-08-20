@@ -1,0 +1,7 @@
+[20-Aug-2026 05:38:45 UTC] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 8.1.34. in /home/theabacu/almantic/main/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /home/theabacu/almantic/main/vendor/composer/autoload_real.php(25): require()
+#1 /home/theabacu/almantic/main/vendor/autoload.php(22): ComposerAutoloaderInit626b9e7ddd47fb7eff9aaa53cce0c9ad::getLoader()
+#2 /home/theabacu/almantic/index.php(13): require('/home/theabacu/...')
+#3 {main}
+  thrown in /home/theabacu/almantic/main/vendor/composer/platform_check.php on line 22
