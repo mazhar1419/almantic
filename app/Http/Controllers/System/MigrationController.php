@@ -9,31 +9,95 @@ use Throwable;
 
 class MigrationController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Migration Page
+    |--------------------------------------------------------------------------
+    */
+
+    public function index()
+    {
+        return view('system.migrate');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Migration Result Page
+    |--------------------------------------------------------------------------
+    */
+
+    public function result(Request $request)
+    {
+        $result = $request->session()->get(
+            'migration_result'
+        );
+
+        if (!$result) {
+            return redirect()->route(
+                'system.migrate.page'
+            );
+        }
+
+        return view(
+            'system.migrate-result',
+            compact('result')
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Run Migration
+    |--------------------------------------------------------------------------
+    */
+
     public function run(Request $request)
     {
         /*
         |--------------------------------------------------------------------------
-        | Migration Security
+        | Migration Key
         |--------------------------------------------------------------------------
         */
 
-        $providedKey = (string) $request->header(
-            'X-Almantic-Migration-Key'
+        $providedKey = (string) $request->input(
+            'migration_key'
         );
-
-        if ($providedKey === '') {
-            $providedKey = (string) $request->query('key');
-        }
 
         $configuredKey = (string) config(
-            'app.migration_key'
+            'app.migration_key',
+            ''
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Key
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $configuredKey === '' ||
-            !hash_equals($configuredKey, $providedKey)
+            $providedKey === '' ||
+            !hash_equals(
+                $configuredKey,
+                $providedKey
+            )
         ) {
-            abort(403, 'Migration access denied.');
+
+            return redirect()
+                ->route('system.migrate.result')
+                ->with('migration_result', [
+                    'success' => false,
+
+                    'title' =>
+                        'Migration Access Denied',
+
+                    'message' =>
+                        'The migration key is invalid.',
+
+                    'results' => [],
+                ]);
         }
 
 
@@ -46,30 +110,56 @@ class MigrationController extends Controller
         $migrationPath = database_path('sql');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create Migration Registry
-        |--------------------------------------------------------------------------
-        */
+        if (!is_dir($migrationPath)) {
+
+            return redirect()
+                ->route('system.migrate.result')
+                ->with('migration_result', [
+                    'success' => false,
+
+                    'title' =>
+                        'Migration Failed',
+
+                    'message' =>
+                        'Migration directory does not exist.',
+
+                    'results' => [],
+                ]);
+        }
+
 
         try {
 
+            /*
+            |--------------------------------------------------------------------------
+            | Migration Registry
+            |--------------------------------------------------------------------------
+            */
+
             DB::unprepared("
                 CREATE TABLE IF NOT EXISTS almantic_migrations (
+
                     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
                     migration VARCHAR(190) NOT NULL,
+
                     batch INT UNSIGNED NOT NULL,
-                    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                    applied_at DATETIME NOT NULL
+                        DEFAULT CURRENT_TIMESTAMP,
 
                     PRIMARY KEY (id),
 
-                    UNIQUE KEY uq_almantic_migrations_migration
+                    UNIQUE KEY
+                        uq_almantic_migrations_migration
                         (migration),
 
-                    KEY idx_almantic_migrations_batch
+                    KEY
+                        idx_almantic_migrations_batch
                         (batch)
 
-                ) ENGINE=InnoDB
+                )
+                ENGINE=InnoDB
                 DEFAULT CHARSET=utf8mb4
                 COLLATE=utf8mb4_unicode_ci
             ");
@@ -77,32 +167,32 @@ class MigrationController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Read SQL Files
+            | SQL Files
             |--------------------------------------------------------------------------
             */
 
             $files = glob(
-                $migrationPath . DIRECTORY_SEPARATOR . '*.sql'
+                $migrationPath
+                . DIRECTORY_SEPARATOR
+                . '*.sql'
             ) ?: [];
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Sort Migration Files
-            |--------------------------------------------------------------------------
-            */
-
-            sort($files, SORT_STRING);
+            sort(
+                $files,
+                SORT_STRING
+            );
 
 
             /*
             |--------------------------------------------------------------------------
-            | Get Current Batch
+            | Batch
             |--------------------------------------------------------------------------
             */
 
-            $lastBatch = DB::table('almantic_migrations')
-                ->max('batch');
+            $lastBatch = DB::table(
+                'almantic_migrations'
+            )->max('batch');
 
             $batch = ((int) $lastBatch) + 1;
 
@@ -115,12 +205,12 @@ class MigrationController extends Controller
 
             $results = [];
 
-            $hasNewMigration = false;
+            $hasNewMigrations = false;
 
 
             /*
             |--------------------------------------------------------------------------
-            | Run Migrations
+            | Process Migrations
             |--------------------------------------------------------------------------
             */
 
@@ -131,16 +221,24 @@ class MigrationController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Skip Migration Registry SQL
+                | Migration Registry File
                 |--------------------------------------------------------------------------
                 */
 
-                if ($migration === '000_create_migrations.sql') {
+                if (
+                    $migration ===
+                    '000_create_migrations.sql'
+                ) {
 
                     $results[] = [
-                        'migration' => $migration,
-                        'status' => 'ready',
-                        'message' => 'Migration registry is available.',
+                        'migration' =>
+                            $migration,
+
+                        'status' =>
+                            'ready',
+
+                        'message' =>
+                            'Migration registry is available.',
                     ];
 
                     continue;
@@ -149,7 +247,7 @@ class MigrationController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Already Recorded?
+                | Already Applied
                 |--------------------------------------------------------------------------
                 */
 
@@ -166,9 +264,14 @@ class MigrationController extends Controller
                 if ($alreadyApplied) {
 
                     $results[] = [
-                        'migration' => $migration,
-                        'status' => 'skipped',
-                        'message' => 'Migration already applied.',
+                        'migration' =>
+                            $migration,
+
+                        'status' =>
+                            'skipped',
+
+                        'message' =>
+                            'Migration already applied.',
                     ];
 
                     continue;
@@ -189,9 +292,14 @@ class MigrationController extends Controller
                 if ($sql === '') {
 
                     $results[] = [
-                        'migration' => $migration,
-                        'status' => 'skipped',
-                        'message' => 'Migration file is empty.',
+                        'migration' =>
+                            $migration,
+
+                        'status' =>
+                            'skipped',
+
+                        'message' =>
+                            'Migration file is empty.',
                     ];
 
                     continue;
@@ -200,31 +308,34 @@ class MigrationController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Detect Target Table
+                | Detect Table
                 |--------------------------------------------------------------------------
-                |
-                | Example:
-                |
-                | CREATE TABLE IF NOT EXISTS users (...)
-                |
                 */
 
                 $tableName = null;
 
+                $pattern =
+                    '/CREATE\s+TABLE\s+'
+                    . 'IF\s+NOT\s+EXISTS\s+'
+                    . '[`"]?([A-Za-z0-9_]+)[`"]?/i';
+
+
                 if (
                     preg_match(
-                        '/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+[`"]?([A-Za-z0-9_]+)[`"]?/i',
+                        $pattern,
                         $sql,
                         $matches
                     )
                 ) {
-                    $tableName = $matches[1];
+
+                    $tableName =
+                        $matches[1];
                 }
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | If Table Already Exists
+                | Existing Table
                 |--------------------------------------------------------------------------
                 */
 
@@ -237,8 +348,11 @@ class MigrationController extends Controller
                     $tableExists = DB::selectOne(
                         "
                         SELECT COUNT(*) AS count
+
                         FROM information_schema.tables
+
                         WHERE table_schema = ?
+
                         AND table_name = ?
                         ",
                         [
@@ -249,27 +363,39 @@ class MigrationController extends Controller
 
 
                     if (
-                        ((int) ($tableExists->count ?? 0)) > 0
+                        (int) (
+                            $tableExists->count ?? 0
+                        ) > 0
                     ) {
 
                         DB::table(
                             'almantic_migrations'
                         )->insert([
-                            'migration' => $migration,
-                            'batch' => $batch,
-                            'applied_at' => now(),
+                            'migration' =>
+                                $migration,
+
+                            'batch' =>
+                                $batch,
+
+                            'applied_at' =>
+                                now(),
                         ]);
 
 
                         $results[] = [
-                            'migration' => $migration,
-                            'status' => 'skipped',
+                            'migration' =>
+                                $migration,
+
+                            'status' =>
+                                'skipped',
+
                             'message' =>
-                                "Table '{$tableName}' already exists.",
+                                "Table '{$tableName}' "
+                                . "already exists.",
                         ];
 
 
-                        $hasNewMigration = true;
+                        $hasNewMigrations = true;
 
                         continue;
                     }
@@ -294,45 +420,117 @@ class MigrationController extends Controller
                 DB::table(
                     'almantic_migrations'
                 )->insert([
-                    'migration' => $migration,
-                    'batch' => $batch,
-                    'applied_at' => now(),
+                    'migration' =>
+                        $migration,
+
+                    'batch' =>
+                        $batch,
+
+                    'applied_at' =>
+                        now(),
                 ]);
 
 
                 $results[] = [
-                    'migration' => $migration,
-                    'status' => 'applied',
-                    'message' => 'Migration applied successfully.',
+                    'migration' =>
+                        $migration,
+
+                    'status' =>
+                        'applied',
+
+                    'message' =>
+                        'Migration applied successfully.',
                 ];
 
 
-                $hasNewMigration = true;
+                $hasNewMigrations = true;
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | Response
+            | Save Result
             |--------------------------------------------------------------------------
             */
 
-            return response()->json([
-                'success' => true,
-                'batch' => $batch,
-                'has_new_migrations' => $hasNewMigration,
-                'results' => $results,
-            ]);
+            $result = [
+                'success' =>
+                    true,
+
+                'title' =>
+                    'Migration Successful',
+
+                'message' =>
+                    'All pending migrations have been processed.',
+
+                'batch' =>
+                    $batch,
+
+                'has_new_migrations' =>
+                    $hasNewMigrations,
+
+                'results' =>
+                    $results,
+            ];
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Redirect Result Page
+            |--------------------------------------------------------------------------
+            */
+
+            return redirect()
+                ->route('system.migrate.result')
+                ->with(
+                    'migration_result',
+                    $result
+                );
+
 
         } catch (Throwable $e) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Log Error
+            |--------------------------------------------------------------------------
+            */
 
             report($e);
 
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Migration failed.',
-            ], 500);
+            /*
+            |--------------------------------------------------------------------------
+            | Error Result
+            |--------------------------------------------------------------------------
+            */
+
+            $result = [
+                'success' =>
+                    false,
+
+                'title' =>
+                    'Migration Failed',
+
+                'message' =>
+                    config('app.debug')
+                        ? $e->getMessage()
+                        : 'An error occurred while running the migration.',
+
+                'batch' =>
+                    $batch ?? null,
+
+                'results' =>
+                    $results ?? [],
+            ];
+
+
+            return redirect()
+                ->route('system.migrate.result')
+                ->with(
+                    'migration_result',
+                    $result
+                );
         }
     }
 }

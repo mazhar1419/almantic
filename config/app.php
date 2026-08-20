@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'migration_key' => env(
+    'ALMANTIC_MIGRATION_KEY'
+),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
