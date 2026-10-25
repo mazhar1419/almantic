@@ -8,7 +8,7 @@
 
 Manage leads, customers, deals, invoices, projects, tasks, files, and team conversations in one workspace—whether you're working independently or collaborating with a company.
 
-[**Open the Live App**](https://almantic.xyz/) · [**GitHub Repository**](https://github.com/mazhar1419/almantic) · [**Contact the Developer**](https://www.linkedin.com/in/mazhar1419)
+[🚀 **TRY THE LIVE APP**](https://almantic.xyz/) · [📚 **EXPLORE PROJECT DOCS**](https://github.com/mazhar1419/almantic/tree/main/docs) · [**GitHub Repository**](https://github.com/mazhar1419/almantic) · [**Contact the Developer**](https://www.linkedin.com/in/mazhar1419)
 
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
@@ -26,11 +26,31 @@ Manage leads, customers, deals, invoices, projects, tasks, files, and team conve
 | **Product** | Almantic |
 | **Category** | Multi-workspace CRM and agency operations SaaS |
 | **Target users** | Freelancers, small agencies, and small-to-medium businesses |
-| **Live application** | [almantic.xyz](https://almantic.xyz/) |
+| **Live application** | [🚀 Open Almantic](https://almantic.xyz/) |
+| **Project documentation** | [📚 Browse the `/docs` directory](https://github.com/mazhar1419/almantic/tree/main/docs) |
 | **Public repository** | [github.com/mazhar1419/almantic](https://github.com/mazhar1419/almantic) |
 | **Application stack** | PHP 8.2+, Laravel 11, Blade, JavaScript, CSS |
 | **Data layer** | MySQL/MariaDB with Laravel Query Builder and SQL migrations |
 | **Source availability** | Selected repository files are public; the complete application source is not published |
+
+## 👀 Start Here — Explore Almantic
+
+If you're reviewing Almantic as a recruiter, engineer, or potential client, these are the best places to start:
+
+<table>
+  <tr>
+    <td><strong>🚀 1. Try the product</strong><br/>Explore the live application and its workflows.<br/><a href="https://almantic.xyz/">Open Almantic →</a></td>
+    <td><strong>📚 2. Read the project docs</strong><br/>Visit the repository's documentation directory for project material and technical context.<br/><a href="https://github.com/mazhar1419/almantic/tree/main/docs">Explore project documentation →</a></td>
+  </tr>
+  <tr>
+    <td><strong>🧩 3. Review the code</strong><br/>The public repository contains selected source files; the complete application source remains private.<br/><a href="https://github.com/mazhar1419/almantic">View the GitHub repository →</a></td>
+    <td><strong>🤝 4. Connect with the developer</strong><br/>Discuss the architecture, implementation choices, or potential collaboration.<br/><a href="https://www.linkedin.com/in/mazhar1419">Connect on LinkedIn →</a></td>
+  </tr>
+</table>
+
+**Recommended:** start with the live application, then open the **[project documentation](https://github.com/mazhar1419/almantic/tree/main/docs)** to learn more about the project. Email verification may land in Spam/Junk, depending on your provider.
+
+---
 
 ## Product Overview
 
@@ -276,9 +296,15 @@ User
 
 The database includes dedicated tables for users, workspaces, workspace members, member permissions, invitations, CRM entities, projects, tasks, invoices, invoice items, payments, files, chat, notifications, scheduled activities, audit logs, login activity, and authentication-related records.
 
-## Repository and Source Availability
+## Project Documentation and Source Availability
 
-**Public repository:** [github.com/mazhar1419/almantic](https://github.com/mazhar1419/almantic)
+**Don't stop at the overview — [open the project docs directory](https://github.com/mazhar1419/almantic/tree/main/docs).**
+
+The `/docs` directory is the next stop for visitors who want more context about the project. Please browse the available documents there alongside the live application.
+
+- [📚 Explore project documentation](https://github.com/mazhar1419/almantic/tree/main/docs)
+- [🚀 Try the live application](https://almantic.xyz/)
+- [💻 Browse the public repository](https://github.com/mazhar1419/almantic)
 
 The public repository contains selected project files and an overview of the application. The complete production application source is not published publicly.
 
